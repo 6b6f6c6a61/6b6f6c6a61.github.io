@@ -1,6 +1,6 @@
 ---
 title: Hack the Box Writeup - Driver
-author: istify
+author: 6b6f6c6a61 
 date: 2022-02-27
 category: Hack the Box
 layout: post
