@@ -46,7 +46,7 @@ PORT      STATE         SERVICE      REASON              VERSION
 [...]
 ```
 
-## User
+## Foothold
 ### SNMP
 I used snmpwalk as follows and found credentials for ssh:
 
@@ -117,7 +117,7 @@ cat /home/matt/user.txt
 98f84903449f019b763831f8e3e5dbf4
 ```
 
-### Privilege escalation to root
+## Privilege escalation to root
 Next I generated an ssh key and put it in the authorized file for matt to get a proper shell. Locally I used:
 ```
 ssh-keygen -t rsa -f tmp 
