@@ -6,7 +6,7 @@ description: a blog about security
 author:
   name:           6b6f6c6a61
   url:            https://twitter.com/6b6f6c6a61
-  email:            -
+  email:          6b6f6c6a61@mailbox.org
 
 plugins:
   - jekyll-paginate
