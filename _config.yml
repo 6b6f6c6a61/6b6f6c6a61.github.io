@@ -12,7 +12,7 @@ plugins:
   - jekyll-paginate
   - jekyll-remote-theme
 
-paginate: 2
+paginate: 5
 
 remote_theme: vfvong/jekyll-theme-tao
 
