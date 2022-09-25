@@ -49,7 +49,7 @@ Now we have credentials we can enumerate the active directory:
 bloodhound-python -c All -u support@blackfield.local -p '#00^BlackKnight' -ns 10.10.10.192 -d blackfield.local -dc DC01.blackfield.local
 ```
 Our user can change the password of another user:
-![[Pasted image 20220524143452.png]]
+![loader_work_flow](/assets/htb_blackfield_attack_path.png)
 
 
 This can be done from Linux using `rpcclient`:
