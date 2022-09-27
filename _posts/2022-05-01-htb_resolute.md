@@ -63,9 +63,11 @@ bloodhound-python -c All -u melanie@megabank.local -p 'Welcome123!' -ns 10.10.10
 ```
 
 The collected data shows, that our owned user is in a group, that have some WMI privileges:
+
 ![wmi group](/assets/htb_resolute_wmi.png)
 
 Additionally, we should be able to use PSRemote to gain access to the DC:
+
 ![psremote permissions](/assets/htb_resolute_psremote.png)
 
 We can use `evil-winrm` to confirm this:
