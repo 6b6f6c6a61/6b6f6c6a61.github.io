@@ -96,7 +96,8 @@ SMB         10.10.10.169    445    RESOLUTE         [+] megabank.local\ryan:Serv
 ```
 
 The data we imported into `bloodhound` tells us, that the user is in the `DNSADMINS` Group:
-![DNSAdmin group](htb_resolute_dns_admin.png)
+
+![DNSAdmin group](/assets/htb_resolute_dns_admin.png)
 
 On older systems, this allowed us to escalate our privileges (this should be fixed by now). To exploit this we need a dll, which we can generate  using `msfvenom`:
 ```
